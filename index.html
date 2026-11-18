@@ -54,24 +54,36 @@
     html{scroll-behavior:auto}
   }
 
-  /* ---------- Film intro ---------- */
+  /* ---------- Film intro : letterbox cinema ---------- */
   #intro{
     position:fixed; inset:0; z-index:500; background:#050403; color:#fff;
     display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
-    padding:24px; cursor:pointer;
+    padding:24px; cursor:pointer; overflow:hidden;
     transition:transform .85s cubic-bezier(.7,0,.2,1), opacity .85s ease;
+    animation:introSafety .6s ease 5.5s forwards;
   }
   #intro.gone{transform:translateY(-102%); opacity:.4; pointer-events:none}
-  #intro .in-eyebrow{font-family:"Barlow Condensed",sans-serif; font-weight:600; letter-spacing:.42em; font-size:14px; color:var(--acc); text-transform:uppercase}
+  #intro .lb{position:absolute; left:0; right:0; height:11vh; min-height:58px; background:#000; z-index:4; transition:transform .9s cubic-bezier(.76,0,.24,1)}
+  #intro .lb-top{top:0; transform:translateY(-102%)}
+  #intro .lb-bot{bottom:0; transform:translateY(102%)}
+  #intro.bars .lb{transform:translateY(0)}
+  #intro.gone .lb-top{transform:translateY(-102%)}
+  #intro.gone .lb-bot{transform:translateY(102%)}
+  #intro .in-eyebrow{font-family:"Barlow Condensed",sans-serif; font-weight:600; letter-spacing:.42em; font-size:14px; color:var(--acc); text-transform:uppercase; opacity:0; animation:fadeUp .7s ease .15s forwards}
   #intro .in-title{font-family:"Barlow Condensed",sans-serif; font-weight:800; text-transform:uppercase; font-size:clamp(58px,13vw,132px); line-height:.92; margin-top:14px}
   #intro .in-title em{font-style:normal; color:var(--acc)}
-  #intro .in-sub{margin-top:14px; color:#b3aa9d; font-size:17px; letter-spacing:.06em}
+  #intro .in-title .in-line{display:block; overflow:hidden; padding-bottom:.1em; margin-bottom:-.1em}
+  #intro .in-title .ltr{display:inline-block; transform:translateY(115%) rotate(6deg); opacity:0; animation:ltrIn .85s cubic-bezier(.16,.85,.26,1) forwards; animation-delay:calc(.35s + var(--i)*.055s)}
+  @keyframes ltrIn{to{transform:translateY(0) rotate(0); opacity:1}}
+  @keyframes fadeUp{from{transform:translateY(14px); opacity:0} to{opacity:1; transform:translateY(0)}}
+  @keyframes introSafety{to{opacity:0; visibility:hidden}}
+  #intro .in-sub{margin-top:14px; color:#b3aa9d; font-size:17px; letter-spacing:.06em; opacity:0; animation:fadeUp .7s ease 1.15s forwards}
   #intro .in-bar{width:min(300px,70vw); height:3px; background:#2a251f; border-radius:99px; margin-top:28px; overflow:hidden}
-  #intro .in-bar span{display:block; height:100%; width:0; background:var(--acc); animation:inload 1.5s ease forwards}
+  #intro .in-bar span{display:block; height:100%; width:0; background:var(--acc); animation:inload 2.2s ease forwards}
   @keyframes inload{to{width:100%}}
-  #intro .in-skip{margin-top:20px; font-size:13px; letter-spacing:.18em; text-transform:uppercase; color:#857d70}
+  #intro .in-skip{margin-top:20px; font-size:13px; letter-spacing:.18em; text-transform:uppercase; color:#857d70; opacity:0; animation:fadeUp .7s ease 1.5s forwards}
   #intro::after{
-    content:""; position:absolute; inset:0; pointer-events:none; opacity:.5; mix-blend-mode:overlay;
+    content:""; position:absolute; inset:0; pointer-events:none; opacity:.5; mix-blend-mode:overlay; z-index:5;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
   }
   @media (prefers-reduced-motion: reduce){ #intro{display:none} }
@@ -119,7 +131,6 @@
     background:linear-gradient(100deg, rgba(5,4,3,.96) 30%, rgba(5,4,3,.78) 58%, rgba(5,4,3,.45) 100%),
                linear-gradient(0deg, var(--bg) 0%, transparent 26%),
                radial-gradient(700px 420px at 82% 30%, rgba(255,140,26,.20), transparent 65%);}
-  #dust{position:absolute; inset:0; z-index:1; pointer-events:none}
   .hero-word{
     position:absolute; z-index:1; right:-10px; top:6px; pointer-events:none; user-select:none;
     font-family:"Barlow Condensed",sans-serif; font-weight:800; font-size:clamp(120px,22vw,300px);
@@ -462,6 +473,38 @@
   #toTop.show{opacity:1}
   #toTop:hover{background:var(--acc); color:#1a1206}
   @media (min-width:821px){ #toTop{bottom:22px} }
+
+  /* ================= CINEMATIC UPGRADE LAYER ================= */
+  /* WebGL mount (hero) */
+  #glMount{position:absolute; inset:0; z-index:1; pointer-events:none; overflow:hidden}
+  #glMount canvas{display:block; width:100% !important; height:100% !important}
+
+  /* Split-text staggered headline reveals */
+  .split .w{display:inline-block; overflow:hidden; vertical-align:bottom; padding-bottom:.09em; margin-bottom:-.09em}
+  .split .wi{display:inline-block; transform:translateY(112%) rotate(5deg); opacity:0; will-change:transform, opacity;
+    transition:transform .85s cubic-bezier(.16,.85,.26,1), opacity .5s ease;
+    transition-delay:calc(var(--d,0)*1ms)}
+  .split-in .wi{transform:translateY(0) rotate(0); opacity:1}
+  @media (prefers-reduced-motion: reduce){ .split .wi{transform:none; opacity:1; transition:none} }
+
+  /* Scroll camera: hero zoom-out + giant words */
+  .hero-grid{will-change:transform, opacity}
+  .hero-word{will-change:transform}
+  .giant2{
+    position:absolute; z-index:0; right:-12px; top:30px; pointer-events:none; user-select:none;
+    font-family:"Barlow Condensed",sans-serif; font-weight:800; font-size:clamp(110px,20vw,260px);
+    line-height:.8; color:transparent; -webkit-text-stroke:1.5px rgba(255,140,26,.16); letter-spacing:.02em;
+    will-change:transform;
+  }
+
+  /* Stack cards: peel origin + tilt */
+  .stack-card{transform-origin:50% 0; will-change:transform}
+  .tilt{will-change:transform}
+  .mq-wrap,.film{will-change:transform}
+
+  /* Second filmstrip (reverse) */
+  .film-rev{border-top:none; padding-top:0}
+  .film-rev .film-track{animation-direction:reverse; animation-duration:46s}
 </style>
 </head>
 <body>
@@ -469,11 +512,13 @@
 
 <!-- ===================== FILM INTRO ===================== -->
 <div id="intro" role="button" tabindex="0" aria-label="Skip intro">
+  <div class="lb lb-top" aria-hidden="true"></div>
+  <div class="lb lb-bot" aria-hidden="true"></div>
   <div class="in-eyebrow">Lancaster County &bull; Pennsylvania</div>
-  <div class="in-title">Danny&rsquo;s<br /><em>Hauling</em></div>
+  <div class="in-title"><span class="in-line"><span class="ltr" style="--i:0">D</span><span class="ltr" style="--i:1">a</span><span class="ltr" style="--i:2">n</span><span class="ltr" style="--i:3">n</span><span class="ltr" style="--i:4">y</span><span class="ltr" style="--i:5">&rsquo;</span><span class="ltr" style="--i:6">s</span></span><span class="in-line"><em><span class="ltr" style="--i:7">H</span><span class="ltr" style="--i:8">a</span><span class="ltr" style="--i:9">u</span><span class="ltr" style="--i:10">l</span><span class="ltr" style="--i:11">i</span><span class="ltr" style="--i:12">n</span><span class="ltr" style="--i:13">g</span></em></span></div>
   <div class="in-sub">Junk Removal &mdash; we load it, we haul it, it&rsquo;s gone.</div>
   <div class="in-bar"><span></span></div>
-  <div class="in-skip">Tap anywhere to skip</div>
+  <div class="in-skip">Scroll or tap to continue</div>
 </div>
 
 <!-- ===================== TOP BAR ===================== -->
@@ -510,12 +555,12 @@
     <div class="hslide"><img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&amp;fit=crop&amp;w=1800&amp;q=70" alt="" /></div>
   </div>
   <div class="hero-shade"></div>
-  <canvas id="dust" aria-hidden="true"></canvas>
+  <div id="glMount" aria-hidden="true"></div>
   <div class="hero-word" aria-hidden="true">HAUL</div>
-  <div class="hero-grid">
+  <div class="hero-grid" id="heroGrid">
     <div class="hero-copy">
       <span class="hero-eyebrow"><span class="dot"></span> Lancaster County &bull; Licensed &amp; insured</span>
-      <h1><span class="thin">Got junk?</span> We haul <span class="hl">it away.</span></h1>
+      <h1 class="split"><span class="thin">Got junk?</span> We haul <span class="hl">it away.</span></h1>
       <p class="hero-tag">Danny&rsquo;s Hauling &amp; Junk Removal — old furniture, full cleanouts, and everything in between, loaded up and gone.</p>
       <div class="price-row-hero">
         <div class="price-chip"><div class="p1">from $150</div><div class="p2">Full-service junk removal</div></div>
@@ -597,10 +642,11 @@
 
 <!-- ===================== SERVICES : STICKY STACK ===================== -->
 <section id="services">
+  <div class="giant2" aria-hidden="true">JUNK</div>
   <div class="wrap">
     <div class="reveal">
       <div class="kicker">What Danny does</div>
-      <h2>Services</h2>
+      <h2 class="split">Services</h2>
       <p class="lede">Six simple services. Every one starts with a free quote &mdash; call, tell Danny what you&rsquo;ve got, get a straight price.</p>
     </div>
     <div class="stack">
@@ -697,7 +743,7 @@
   <img class="bg" data-plx="30" src="https://images.unsplash.com/photo-1603712725038-e9334ae8f39f?auto=format&amp;fit=crop&amp;w=1800&amp;q=70" alt="" loading="lazy" />
   <div class="shade"></div>
   <div class="wrap">
-    <div class="big">Point. <em>We load.</em><br />It&rsquo;s gone.</div>
+    <div class="big split">Point. <em>We load.</em><br />It&rsquo;s gone.</div>
     <p>Garages, basements, spare rooms, whole houses &mdash; if it&rsquo;s in the way, we take it away.</p>
   </div>
 </section>
@@ -707,7 +753,7 @@
   <div class="wrap">
     <div class="reveal">
       <div class="kicker">What we haul</div>
-      <h2>The stuff that&rsquo;s in your way</h2>
+      <h2 class="split">The stuff that&rsquo;s in your way</h2>
       <p class="lede">Sofas, beds, boxes, old appliances &mdash; if it needs to go, it goes. Tap any photo to take a closer look.</p>
     </div>
     <div class="gal reveal">
@@ -736,12 +782,25 @@
   </div>
 </div>
 
+<div class="film film-rev" aria-label="More photos — tap any photo to enlarge">
+  <div class="film-track" id="filmTrack2">
+    <figure><img src="https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&amp;fit=crop&amp;w=600&amp;q=70" alt="A clear living room" loading="lazy" /></figure>
+    <figure><img src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&amp;fit=crop&amp;w=600&amp;q=70" alt="Small demolition job" loading="lazy" /></figure>
+    <figure><img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&amp;fit=crop&amp;w=600&amp;q=70" alt="A Lancaster County home" loading="lazy" /></figure>
+    <figure><img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&amp;fit=crop&amp;w=600&amp;q=70" alt="Clearing out and cleaning up" loading="lazy" /></figure>
+    <figure><img src="https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&amp;fit=crop&amp;w=600&amp;q=70" alt="On the road hauling" loading="lazy" /></figure>
+    <figure><img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&amp;fit=crop&amp;w=600&amp;q=70" alt="Mattress pickup" loading="lazy" /></figure>
+    <figure><img src="https://images.unsplash.com/photo-1600518464441-9154a4dea21b?auto=format&amp;fit=crop&amp;w=600&amp;q=70" alt="Boxes ready to haul" loading="lazy" /></figure>
+    <figure><img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&amp;fit=crop&amp;w=600&amp;q=70" alt="Sofa pickup" loading="lazy" /></figure>
+  </div>
+</div>
+
 <!-- ===================== MEET DANNY ===================== -->
 <section class="section-dark" id="how">
   <div class="wrap">
     <div class="reveal">
       <div class="kicker">Who you&rsquo;re calling</div>
-      <h2>Meet Danny</h2>
+      <h2 class="split">Meet Danny</h2>
     </div>
     <div class="why-grid">
       <div class="owner-card reveal" data-rv="left">
@@ -769,7 +828,7 @@
   <div class="wrap">
     <div class="reveal">
       <div class="kicker">Three easy steps</div>
-      <h2>How it works</h2>
+      <h2 class="split">How it works</h2>
       <p class="lede">No forms that go nowhere. No waiting days for a call back. Just this:</p>
     </div>
     <div class="steps">
@@ -837,7 +896,7 @@
   <div class="wrap area-grid">
     <div class="reveal" data-rv="left">
       <div class="kicker">Where we work</div>
-      <h2>Service area</h2>
+      <h2 class="split">Service area</h2>
       <p class="lede">Danny&rsquo;s Hauling is based in Lancaster, PA, and serves homes and businesses across Lancaster County.</p>
       <div class="area-list">
         <span class="chip main">Lancaster</span>
@@ -855,7 +914,7 @@
 <section class="cta-band" id="ctaBand" style="padding:60px 0">
   <svg class="cta-truck" viewBox="0 0 64 44" fill="currentColor" aria-hidden="true"><path d="M2 6h38v26H2zM42 14h12l8 8v10H42z"/><circle cx="14" cy="36" r="5"/><circle cx="32" cy="36" r="5"/><circle cx="53" cy="36" r="5"/></svg>
   <div class="wrap">
-    <h2>Ready when you are</h2>
+    <h2 class="split">Ready when you are</h2>
     <p>One call and it&rsquo;s gone. Free quote, straight price, no pressure.</p>
     <a class="phone-big" href="tel:+17176962352">717-696-2352</a>
     <div class="hero-ctas">
@@ -887,86 +946,156 @@
   <div class="lb-cap" id="lbCap"></div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
   (function(){
     "use strict";
     var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var finePointer = window.matchMedia("(pointer: fine)").matches;
 
-    /* ---------- Film intro ---------- */
+    /* ---------- Film intro : letterbox cinema, dismisses on scroll ---------- */
     var intro = document.getElementById("intro");
+    function fireIntroDone(){
+      try { document.dispatchEvent(new Event("introDone")); } catch (e) { /* very old browser */ }
+      window.__introDone = true;
+    }
     if (intro) {
       var introDone = false;
       function dismissIntro(){
         if (introDone) return;
         introDone = true;
+        document.body.style.overflow = "";
         intro.classList.add("gone");
+        fireIntroDone();
         window.setTimeout(function(){ if (intro.parentNode) intro.parentNode.removeChild(intro); }, 1000);
       }
       if (reduceMotion) { dismissIntro(); }
       else {
-        window.setTimeout(dismissIntro, 1800);
+        document.body.style.overflow = "hidden";
+        window.setTimeout(function(){ intro.classList.add("bars"); }, 80);
+        window.setTimeout(dismissIntro, 2600);
         intro.addEventListener("click", dismissIntro);
         intro.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " ") { e.preventDefault(); dismissIntro(); } });
+        window.addEventListener("wheel", dismissIntro, { passive: true, once: true });
+        window.addEventListener("touchmove", dismissIntro, { passive: true, once: true });
       }
-    }
+    } else { fireIntroDone(); }
 
-    /* ---------- Dust particles (hero canvas) ---------- */
-    var canvas = document.getElementById("dust");
-    if (canvas && !reduceMotion) {
-      var ctx = canvas.getContext("2d");
-      var motes = [], cw = 0, ch = 0, dustRaf = null, dustVisible = true;
-      function resizeDust(){
-        var hero = canvas.parentElement;
-        cw = hero.offsetWidth; ch = hero.offsetHeight;
-        var dpr = Math.min(window.devicePixelRatio || 1, 2);
-        canvas.width = cw * dpr; canvas.height = ch * dpr;
-        canvas.style.width = cw + "px"; canvas.style.height = ch + "px";
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      }
-      function newMote(seed){
-        return {
-          x: Math.random() * cw,
-          y: seed ? Math.random() * ch : ch + 10,
-          r: 0.8 + Math.random() * 2.4,
-          vy: -(0.12 + Math.random() * 0.35),
-          sway: Math.random() * Math.PI * 2,
-          swaySpeed: 0.004 + Math.random() * 0.012,
-          o: 0.12 + Math.random() * 0.4
-        };
-      }
-      function initMotes(){
-        motes = [];
-        var n = Math.min(70, Math.floor(cw / 16));
-        for (var i = 0; i < n; i++) motes.push(newMote(true));
-      }
-      function drawDust(){
-        ctx.clearRect(0, 0, cw, ch);
-        for (var i = 0; i < motes.length; i++) {
-          var m = motes[i];
-          m.y += m.vy;
-          m.sway += m.swaySpeed;
-          m.x += Math.sin(m.sway) * 0.25;
-          if (m.y < -12 || m.x < -12 || m.x > cw + 12) motes[i] = newMote(false);
-          var g = ctx.createRadialGradient(m.x, m.y, 0, m.x, m.y, m.r * 4);
-          g.addColorStop(0, "rgba(255,190,110," + m.o + ")");
-          g.addColorStop(1, "rgba(255,190,110,0)");
-          ctx.fillStyle = g;
-          ctx.beginPath();
-          ctx.arc(m.x, m.y, m.r * 4, 0, Math.PI * 2);
-          ctx.fill();
+    /* ---------- WebGL dust & ember field (Three.js, real WebGL) ---------- */
+    window.__dannyGL = window.__dannyGL || { camY: 0, mouseX: 0, mouseY: 0 };
+    var glMount = document.getElementById("glMount");
+    var heroEl = document.querySelector(".hero");
+    if (heroEl) {
+      heroEl.addEventListener("mousemove", function(e){
+        var r = heroEl.getBoundingClientRect();
+        window.__dannyGL.mouseX = (e.clientX - r.left) / Math.max(r.width, 1) - 0.5;
+        window.__dannyGL.mouseY = (e.clientY - r.top) / Math.max(r.height, 1) - 0.5;
+      });
+    }
+    if (glMount && !reduceMotion && window.THREE) {
+      try {
+        var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+        glMount.appendChild(renderer.domElement);
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera(58, 1, 0.1, 60);
+        camera.position.set(0, 0, 9);
+        /* Soft round sprite texture, generated at runtime (no image files) */
+        var sc = document.createElement("canvas");
+        sc.width = sc.height = 64;
+        var sctx = sc.getContext("2d");
+        var grad = sctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+        grad.addColorStop(0, "rgba(255,255,255,1)");
+        grad.addColorStop(0.35, "rgba(255,255,255,.55)");
+        grad.addColorStop(1, "rgba(255,255,255,0)");
+        sctx.fillStyle = grad;
+        sctx.fillRect(0, 0, 64, 64);
+        var spriteTex = new THREE.CanvasTexture(sc);
+        function makeDust(count, size, opacity, color, spreadX, spreadY, spreadZ){
+          var pos = new Float32Array(count * 3), vel = new Float32Array(count);
+          for (var i = 0; i < count; i++) {
+            pos[i * 3] = (Math.random() - 0.5) * spreadX;
+            pos[i * 3 + 1] = (Math.random() - 0.5) * spreadY;
+            pos[i * 3 + 2] = (Math.random() - 0.5) * spreadZ;
+            vel[i] = 0.0015 + Math.random() * 0.004;
+          }
+          var g = new THREE.BufferGeometry();
+          g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+          var m = new THREE.PointsMaterial({ size: size, map: spriteTex, color: color, transparent: true, opacity: opacity, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true });
+          var pts = new THREE.Points(g, m);
+          pts.userData.vel = vel;
+          pts.userData.spreadY = spreadY;
+          return pts;
         }
-        if (dustVisible) dustRaf = window.requestAnimationFrame(drawDust);
-      }
-      function startDust(){ if (!dustRaf) { dustVisible = true; dustRaf = window.requestAnimationFrame(drawDust); } }
-      function stopDust(){ dustVisible = false; if (dustRaf) { window.cancelAnimationFrame(dustRaf); dustRaf = null; } }
-      resizeDust(); initMotes(); startDust();
-      window.addEventListener("resize", function(){ resizeDust(); initMotes(); });
-      if ("IntersectionObserver" in window) {
-        new IntersectionObserver(function(entries){
-          entries.forEach(function(e){ e.isIntersecting ? startDust() : stopDust(); });
-        }).observe(canvas.parentElement);
-      }
+        var isSmall = window.innerWidth < 700;
+        var dustNear = makeDust(isSmall ? 90 : 170, 0.34, 0.85, 0xffc27a, 16, 10, 6);
+        var dustFar = makeDust(isSmall ? 140 : 260, 0.16, 0.5, 0xff9a3c, 18, 11, 8);
+        var dustGroup = new THREE.Group();
+        dustGroup.add(dustNear);
+        dustGroup.add(dustFar);
+        scene.add(dustGroup);
+        /* Glowing ember sprites drifting upward */
+        var embers = [];
+        var emberCount = isSmall ? 7 : 12;
+        for (var e = 0; e < emberCount; e++) {
+          var sm = new THREE.SpriteMaterial({ map: spriteTex, color: 0xff8c1a, transparent: true, opacity: 0.35 + Math.random() * 0.45, depthWrite: false, blending: THREE.AdditiveBlending });
+          var sp = new THREE.Sprite(sm);
+          var s = 0.25 + Math.random() * 0.5;
+          sp.scale.set(s, s, 1);
+          sp.position.set((Math.random() - 0.5) * 14, (Math.random() - 0.5) * 9, (Math.random() - 0.5) * 4);
+          sp.userData.vy = 0.004 + Math.random() * 0.008;
+          sp.userData.ph = Math.random() * Math.PI * 2;
+          embers.push(sp);
+          scene.add(sp);
+        }
+        function sizeGL(){
+          var w = glMount.clientWidth, h = glMount.clientHeight;
+          if (!w || !h) return;
+          renderer.setSize(w, h, false);
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+        }
+        sizeGL();
+        window.addEventListener("resize", sizeGL);
+        var glVisible = true, glRaf = null, glT = 0;
+        function driftPoints(pts, t){
+          var p = pts.geometry.attributes.position, v = pts.userData.vel, sy = pts.userData.spreadY;
+          for (var i = 0; i < v.length; i++) {
+            var y = p.getY(i) + v[i];
+            if (y > sy / 2) y = -sy / 2;
+            p.setY(i, y);
+            p.setX(i, p.getX(i) + Math.sin(t * 0.0004 + i) * 0.0012);
+          }
+          p.needsUpdate = true;
+        }
+        function animateGL(){
+          glT += 16;
+          driftPoints(dustNear, glT);
+          driftPoints(dustFar, glT * 0.7);
+          embers.forEach(function(sp){
+            sp.position.y += sp.userData.vy;
+            sp.position.x += Math.sin(glT * 0.001 + sp.userData.ph) * 0.002;
+            if (sp.position.y > 5.2) { sp.position.y = -5.2; sp.position.x = (Math.random() - 0.5) * 14; }
+            sp.material.opacity = 0.3 + 0.3 * (0.5 + 0.5 * Math.sin(glT * 0.002 + sp.userData.ph));
+          });
+          dustGroup.rotation.y = Math.sin(glT * 0.00005) * 0.08;
+          camera.position.y += ((window.__dannyGL.camY + window.__dannyGL.mouseY * -0.4) - camera.position.y) * 0.05;
+          camera.position.x += ((window.__dannyGL.mouseX * 0.7) - camera.position.x) * 0.04;
+          camera.lookAt(0, 0, 0);
+          renderer.render(scene, camera);
+          if (glVisible && !document.hidden) { glRaf = requestAnimationFrame(animateGL); }
+          else { glRaf = null; }
+        }
+        function startGL(){ if (!glRaf) { glVisible = true; glRaf = requestAnimationFrame(animateGL); } }
+        function stopGL(){ glVisible = false; if (glRaf) { cancelAnimationFrame(glRaf); glRaf = null; } }
+        startGL();
+        if ("IntersectionObserver" in window) {
+          new IntersectionObserver(function(entries){
+            entries.forEach(function(en){ en.isIntersecting ? startGL() : stopGL(); });
+          }).observe(glMount);
+        }
+        document.addEventListener("visibilitychange", function(){ document.hidden ? stopGL() : startGL(); });
+      } catch (err) { /* WebGL unavailable — the page works fine without it */ }
     }
 
     /* ---------- Quote builder ---------- */
@@ -1021,14 +1150,102 @@
       }
     }
 
-    /* ---------- Parallax backgrounds + scroll-driven camera ---------- */
+    /* ---------- Split-text staggered headline reveals ---------- */
+    function splitWords(el){
+      var nodes = Array.prototype.slice.call(el.childNodes);
+      nodes.forEach(function(node){
+        if (node.nodeType === 3) {
+          var frag = document.createDocumentFragment();
+          node.textContent.split(/(\s+)/).forEach(function(part){
+            if (!part) return;
+            if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(" ")); return; }
+            var w = document.createElement("span");
+            w.className = "w";
+            var inner = document.createElement("span");
+            inner.className = "wi";
+            inner.textContent = part;
+            w.appendChild(inner);
+            frag.appendChild(w);
+          });
+          el.replaceChild(frag, node);
+        } else if (node.nodeType === 1 && node.tagName !== "BR") {
+          splitWords(node);
+        }
+      });
+    }
+    var splitEls = [];
+    var heroH1 = null;
+    if (!reduceMotion) {
+      splitEls = Array.prototype.slice.call(document.querySelectorAll(".split"));
+      splitEls.forEach(function(el){
+        splitWords(el);
+        Array.prototype.slice.call(el.querySelectorAll(".wi")).forEach(function(wi, i){
+          wi.style.setProperty("--d", (i * 55).toString());
+        });
+      });
+      heroH1 = document.querySelector(".hero h1.split");
+      if ("IntersectionObserver" in window) {
+        var sio2 = new IntersectionObserver(function(entries){
+          entries.forEach(function(e){
+            if (e.isIntersecting) { e.target.classList.add("split-in"); sio2.unobserve(e.target); }
+          });
+        }, { threshold: 0.25 });
+        splitEls.forEach(function(el){ if (el !== heroH1) sio2.observe(el); });
+      } else {
+        splitEls.forEach(function(el){ el.classList.add("split-in"); });
+      }
+      function revealHeroH1(){ if (heroH1) heroH1.classList.add("split-in"); }
+      if (window.__introDone) { revealHeroH1(); }
+      else {
+        document.addEventListener("introDone", revealHeroH1);
+        window.setTimeout(revealHeroH1, 3200);
+      }
+    }
+
+    /* ---------- Scroll-driven camera : one rAF loop, transform/opacity only ---------- */
     var plxEls = Array.prototype.slice.call(document.querySelectorAll("[data-plx]"));
     var stageInner = document.getElementById("stageInner");
     var hero = document.querySelector(".hero");
-    var ticking = false;
-    function parallax(){
-      ticking = false;
+    var heroGrid = document.getElementById("heroGrid");
+    var heroWord = document.querySelector(".hero-word");
+    var giant2 = document.querySelector(".giant2");
+    var servicesSec = document.getElementById("services");
+    var stackCards = Array.prototype.slice.call(document.querySelectorAll(".stack-card"));
+    var mqWrap = document.querySelector(".mq-wrap");
+    var filmEls = Array.prototype.slice.call(document.querySelectorAll(".film"));
+
+    /* 3D tilt targets (fine pointer only) */
+    var tiltItems = [];
+    if (finePointer && !reduceMotion) {
+      [[".stack-card", 2.5], [".gal figure", 8], [".price-chip", 8], [".stat", 6], [".step", 5], [".owner-card", 4], [".chip", 6]].forEach(function(cfg){
+        document.querySelectorAll(cfg[0]).forEach(function(el){
+          el.classList.add("tilt");
+          var item = { el: el, max: cfg[1], trx: 0, try_: 0, crx: 0, cry: 0, peel: 1, peelRx: 0, cleared: false };
+          el.addEventListener("pointermove", function(e){
+            var r = el.getBoundingClientRect();
+            var nx = (e.clientX - r.left) / Math.max(r.width, 1) - 0.5;
+            var ny = (e.clientY - r.top) / Math.max(r.height, 1) - 0.5;
+            item.try_ = nx * item.max * 2;
+            item.trx = ny * item.max * -2;
+          });
+          el.addEventListener("pointerleave", function(){ item.trx = 0; item.try_ = 0; });
+          tiltItems.push(item);
+        });
+      });
+    }
+    var stackTilt = {};
+    tiltItems.forEach(function(it){ if (it.el.classList.contains("stack-card")) stackTilt[stackCards.indexOf(it.el)] = it; });
+
+    var smoothY = window.scrollY || 0, prevSmoothY = smoothY;
+    function cameraLoop(){
+      var targetY = window.scrollY || 0;
+      smoothY += (targetY - smoothY) * 0.14;
+      if (Math.abs(targetY - smoothY) < 0.05) smoothY = targetY;
+      var vel = smoothY - prevSmoothY;
+      prevSmoothY = smoothY;
       var vh = window.innerHeight;
+
+      /* Parallax backgrounds */
       plxEls.forEach(function(el){
         var host = el.parentElement.getBoundingClientRect();
         if (host.bottom < -100 || host.top > vh + 100) return;
@@ -1036,18 +1253,69 @@
         var progress = (host.top + host.height / 2 - vh / 2) / vh;
         el.style.setProperty("--py", (progress * amt * -1).toFixed(1) + "px");
       });
-      /* Scroll-driven camera: the 3D stage slowly turns as you scroll through the hero */
-      if (stageInner && hero && !reduceMotion) {
-        var hr = hero.getBoundingClientRect();
-        var p = Math.max(0, Math.min(1, -hr.top / Math.max(hr.height, 1)));
-        stageInner.style.setProperty("--srx", (p * 9).toFixed(2) + "deg");
-        stageInner.style.setProperty("--sry", (p * -14).toFixed(2) + "deg");
+
+      /* Hero camera: zoom-out + fade as you scroll away; WebGL camera follows */
+      if (hero && heroGrid) {
+        var hh = Math.max(hero.offsetHeight, 1);
+        var hp = Math.max(0, Math.min(1, smoothY / hh));
+        heroGrid.style.transform = "translate3d(0," + (hp * 38).toFixed(1) + "px,0) scale(" + (1 - hp * 0.05).toFixed(3) + ")";
+        heroGrid.style.opacity = (1 - hp * 0.45).toFixed(3);
+        if (heroWord) heroWord.style.transform = "translate3d(" + (-hp * 170).toFixed(1) + "px,0,0)";
+        if (window.__dannyGL) window.__dannyGL.camY = hp * -1.8;
+        if (stageInner) {
+          stageInner.style.setProperty("--srx", (hp * 9).toFixed(2) + "deg");
+          stageInner.style.setProperty("--sry", (hp * -14).toFixed(2) + "deg");
+        }
       }
+
+      /* Giant word 2 drifts across the services section */
+      if (giant2 && servicesSec) {
+        var sr = servicesSec.getBoundingClientRect();
+        var sp = Math.max(0, Math.min(1, (vh * 0.95 - sr.top) / (vh * 0.95 + sr.height * 0.45)));
+        giant2.style.transform = "translate3d(" + (sp * 190 - 95).toFixed(1) + "px,0,0)";
+      }
+
+      /* Sticky stack peel: each card shrinks slightly as the next covers it */
+      stackCards.forEach(function(card, i){
+        var it = stackTilt[i];
+        var scale = 1, rx = 0;
+        if (i < stackCards.length - 1) {
+          var nr = stackCards[i + 1].getBoundingClientRect();
+          var stickTop = 72 + i * 14;
+          var p = Math.max(0, Math.min(1, 1 - (nr.top - stickTop - 30) / (vh * 0.55)));
+          scale = 1 - p * 0.055;
+          rx = p * 1.6;
+        }
+        if (it) { it.peel = scale; it.peelRx = rx; }
+        else { card.style.transform = "scale(" + scale.toFixed(3) + ") rotateX(" + rx.toFixed(2) + "deg)"; }
+      });
+
+      /* Scroll-velocity skew on marquees + filmstrips */
+      var skew = Math.max(-4, Math.min(4, vel * 0.14));
+      var skewCss = "skewX(" + skew.toFixed(2) + "deg)";
+      if (mqWrap) mqWrap.style.transform = skewCss;
+      filmEls.forEach(function(f){ f.style.transform = skewCss; });
+
+      /* 3D tilt: lerp toward pointer targets, composed with peel */
+      tiltItems.forEach(function(it){
+        var el = it.el;
+        if (el.classList.contains("reveal") && !el.classList.contains("in")) return;
+        if (!it.cleared) { el.style.transition = "none"; it.cleared = true; }
+        it.crx += (it.trx - it.crx) * 0.12;
+        it.cry += (it.try_ - it.cry) * 0.12;
+        var isStack = el.classList.contains("stack-card");
+        var t = "perspective(1000px)";
+        if (isStack) t += " scale(" + it.peel.toFixed(3) + ")";
+        t += " rotateX(" + (it.crx + (isStack ? it.peelRx : 0)).toFixed(2) + "deg) rotateY(" + it.cry.toFixed(2) + "deg)";
+        el.style.transform = t;
+      });
+
+      window.requestAnimationFrame(cameraLoop);
     }
-    function onScroll(){ if (!ticking) { ticking = true; window.requestAnimationFrame(parallax); } }
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    parallax();
+    if (!reduceMotion) cameraLoop();
+    else {
+      document.querySelectorAll(".split").forEach(function(el){ el.classList.add("split-in"); });
+    }
 
     if (reduceMotion || !finePointer) return;
 
@@ -1149,15 +1417,17 @@
       counters.forEach(function(el){ cio.observe(el); });
     } else { counters.forEach(runCounter); }
 
-    /* ---------- Filmstrip : duplicate for a seamless loop ---------- */
-    var film = document.getElementById("filmTrack");
-    if (film && !reduceMotion) {
-      Array.prototype.slice.call(film.children).forEach(function(fig){
-        var clone = fig.cloneNode(true);
-        clone.setAttribute("aria-hidden", "true");
-        film.appendChild(clone);
-      });
-    }
+    /* ---------- Filmstrips : duplicate for a seamless loop ---------- */
+    ["filmTrack", "filmTrack2"].forEach(function(id){
+      var film = document.getElementById(id);
+      if (film && !reduceMotion) {
+        Array.prototype.slice.call(film.children).forEach(function(fig){
+          var clone = fig.cloneNode(true);
+          clone.setAttribute("aria-hidden", "true");
+          film.appendChild(clone);
+        });
+      }
+    });
 
     /* ---------- Lightbox (gallery + filmstrip) ---------- */
     var lb = document.getElementById("lightbox");
